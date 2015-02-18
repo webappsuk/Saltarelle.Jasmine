@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Serialization;
+using System.Threading.Tasks;
 
 [assembly: PreserveMemberCase]
 
@@ -84,11 +85,17 @@ namespace Jasmine
         [InlineCode("it({desc},{func})")]
         public static void it(string desc, Action<Action> func) { }
 
+        [InlineCode("it({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void it(string desc, Func<Task> func) { }
+
         [InlineCode("fit({desc},{func})")]
         public static void fit(string desc, Action func) { }
 
         [InlineCode("fit({desc},{func})")]
         public static void fit(string desc, Action<Action> func) { }
+
+        [InlineCode("fit({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void fit(string desc, Func<Task> func) { }
 
         [InlineCode("xit({desc},{func})")]
         public static void xit(string desc, Action func) { }
@@ -96,12 +103,12 @@ namespace Jasmine
         [InlineCode("xit({desc},{func})")]
         public static void xit(string desc, Action<Action> func) { }
 
+        [InlineCode("xit({desc}, ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void xit(string desc, Func<Task> func) { }
+
         [InlineCode("pending()")]
         public void pending() { }
-
-        [InlineCode("expect({func})")]
-        public Matcher expect(Function func) { return null; }
-
+        
         [InlineCode("expect({o})")]
         public Matcher expect(object o) { return null; }
 
@@ -111,11 +118,17 @@ namespace Jasmine
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action<Action> func) { }
 
+        [InlineCode("beforeEach(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void beforeEach(Func<Task> func) { }
+
         [InlineCode("afterEach({func})")]
         public static void afterEach(Action func) { }
 
         [InlineCode("afterEach({func})")]
         public static void afterEach(Action<Action> func) { }
+
+        [InlineCode("afterEach(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void afterEach(Func<Task> func) { }
 
         [InlineCode("beforeAll({func})")]
         public static void beforeAll(Action func) { }
@@ -123,11 +136,17 @@ namespace Jasmine
         [InlineCode("beforeAll({func})")]
         public static void beforeAll(Action<Action> func) { }
 
+        [InlineCode("beforeAll(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void beforeAll(Func<Task> func) { }
+
         [InlineCode("afterAll({func})")]
         public static void afterAll(Action func) { }
 
         [InlineCode("afterAll({func})")]
         public static void afterAll(Action<Action> func) { }
+
+        [InlineCode("afterAll(ss.mkdel(this, function(done) {{ {func}().continueWith(done); }}))")]
+        public static void afterAll(Func<Task> func) { }
 
         [InlineCode("spyOn({o},{methodname})")]
         public static Spy spyOn(object o, string methodname) { return null; }
