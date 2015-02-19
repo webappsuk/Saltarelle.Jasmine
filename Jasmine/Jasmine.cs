@@ -112,6 +112,9 @@ namespace Jasmine
         [InlineCode("expect({o})")]
         public Matcher expect(object o) { return null; }
 
+        [InlineCode("expect({d})")]
+        public Matcher expect(Delegate d) { return null; }
+
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action func) { }
 
@@ -150,7 +153,7 @@ namespace Jasmine
 
         [InlineCode("spyOn({o},{methodname})")]
         public static Spy spyOn(object o, string methodname) { return null; }
-
+        
         [InlineCode("jasmine.createSpy({name})")]
         public Spy createSpy(string name) { return null; }
 
