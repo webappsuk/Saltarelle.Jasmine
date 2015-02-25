@@ -15,15 +15,18 @@ using System.Text.RegularExpressions;
 namespace Jasmine
 {
     [Imported]
-    public class Matcher
+    public class Matchers
     {
-        private Matcher(Env env, object actual, Env spec, bool isNot = false) { }
+        private Matchers(Env env, object actual, Env spec, bool isNot = false) { }
 
         public Env env;
         public object actual;
         public Env spec;
         public bool isNot = false;
-        public object message() { }
+        public object message()
+        {
+            return null;
+        }
 
         public bool toBe(object expected) { return false; }
         public bool toEqual(object expected) { return false; }
@@ -42,32 +45,53 @@ namespace Jasmine
         public bool toBeGreaterThan(object expected) { return false; }
         public bool toBeCloseTo(object expected, int precision) { return false; }
         public bool toThrow() { return false; }
-        public bool toThrow(object expected) { return false; }
+        public bool toThrowError() { return false; }
+        public bool toThrowError(object expected) { return false; }
 
         [IntrinsicProperty]
-        public Matcher not { get { return null; } }
+        public Matchers not { get { return null; } }
 
         // any matcher
         public IAny Any;
 
         // typeof matcher?
     }
-
-    [Imported]
-    public class SpyCall
+    
+    public interface ICustomMatcher<in T>
     {
-        public object[] args;
+        MatcherResult Compare(object actual, T expect);
+    }
+
+    [PreserveMemberCase(false)]
+    public class MatcherResult
+    {
+        public bool Pass;
+        public string Message;
+
+        public MatcherResult(bool pass, string message)
+        {
+            Pass = pass;
+            Message = message;
+        }
+    }
+
+    
+    public interface ICustomMatcherUtil
+    {
+        [PreserveName]
+        string buildFailureMessage();
+        [PreserveName]
+        bool contains(object haystack, object needle, object customTesters);
+        [PreserveName]
+        bool equals(object a, object b, object customTesters);
     }
 
     [Imported]
     public class Spy
     {
         public string identity;
-        public SpyCall mostRecentCall;
-        public Calls calls;
-        public Spy andCallThrough() { return null; }
-        public Spy andReturn(object o) { return null; }
-        public Spy andCallFake<T>(Func<T> function) { return null; }
+        public ICalls calls;
+        public ISpyAnd and;
         [InlineCode("{this}({*args})")]
         public void Call(params object[] args) { }
 
@@ -123,13 +147,13 @@ namespace Jasmine
         public static void xit(string desc, Func<Task> func) { }
 
         [InlineCode("pending()")]
-        public void pending() { }
+        public static void pending() { }
 
         [InlineCode("expect({o})")]
-        public Matcher expect(object o) { return null; }
+        public static Matchers expect(object o) { return null; }
 
         [InlineCode("expect({d})")]
-        public Matcher expect(Delegate d) { return null; }
+        public static Matchers expect(Delegate d) { return null; }
 
         [InlineCode("beforeEach({func})")]
         public static void beforeEach(Action func) { }
@@ -171,10 +195,26 @@ namespace Jasmine
         public static Spy spyOn(object o, string methodname) { return null; }
 
         [InlineCode("jasmine.createSpy({name})")]
-        public Spy createSpy(string name) { return null; }
+        public static Jasmine.Spy createSpy(string name)
+        {
+            return null;
+        }
+        public static Jasmine.Spy createSpy(string name, Delegate originalFunction)
+        {
+            return null;
+        }
 
-        [InlineCode("jasmine.createSpyObj({name},{args})")]
-        public Spy createSpyObj(string name, string[] args) { return null; }
+        [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
+        public static dynamic createSpyObj(string baseName, string[] methodNames)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
+        public static T createSpyObj<T>(string baseName, string[] methodNames)
+        {
+            return default(T);
+        }
 
         // clock mock
 
@@ -182,7 +222,7 @@ namespace Jasmine
         [InlineCode("runs({func})")]
         public static void runs(Action func) { }
 
-        [InlineCode("waitsFor({func},{failure_message},{timeout})")]
+        [InlineCode("waitsFor({func},{failureMessage},{timeout})")]
         public static void waitsFor(Func<bool> func, string failureMessage, int timeout) { }
 
         [InlineCode("waitsFor({func},'',{timeout})")]
@@ -190,18 +230,94 @@ namespace Jasmine
 
         [InlineCode("waitsFor({func})")]
         public static void waitsFor(Func<bool> func) { }
-    }
+
+        [InlineCode("jasmine.clock()")]
+        public static Clock clock()
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.Spec()")]
+        public static Spec Spec()
+        {
+            return null;
+        }
+        
+        [InlineCode("jasmine.any({any})")]
+        public static IAny any(object any)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.objectContaining({sample})")]
+        public static IObjectContaining objectContaining(object sample)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.pp({value})")]
+        public static string pp(object value)
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.getEnv()")]
+        public static Env getEnv()
+        {
+            return null;
+        }
+
+        [InlineCode("jasmine.addMatchers({matcher})")]
+        public static void addMatchers(JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher<string>>> matcher) { }
+
+        [InlineCode("jasmine.addCustomEqualityTester({customEquality})")]
+        public static void addCustomEqualityTester(object customEquality) { }
+        
+        [Imported]
+        public static class Util
+        {
+
+            public static object argsToArray(object args)
+            {
+                return null;
+            }
+            public static bool arrayContains(Array array, object contains)
+            {
+                return false;
+            }
+            public static object clone(object obj)
+            {
+                return null;
+            }
+            public static string htmlEscape(string str)
+            {
+                return null;
+            }
+            public static object inherit(Function childClass, Function parentClass)
+            {
+                return null;
+            }
+            public static bool isUndefined(object obj)
+            {
+                return false;
+            }
+        }
+        
+        public static double DEFAULT_TIMEOUT_INTERVAL {
+            [InlineCode("jasmine.DEFAULT_TIMEOUT_INTERVAL")]
+            get { return 5000; }
+            [InlineCode("jasmine.DEFAULT_TIMEOUT_INTERVAL = {value}")]
+            set {}}
+
+        }
 
     [Imported]
     public class Clock
     {
-        [InlineCode("install()")]
         public void install() { }
-
-        [InlineCode("uninstall()")]
+        
         public void uninstall() { }
-
-        [InlineCode("tick({ms})")]
+        
         public void tick(int ms) { }
     }
     [Imported]
@@ -223,7 +339,7 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface Block
+    public interface IBlock
     {
         object Block(Env env, SpecFunction func, Spec spec);
 
@@ -231,13 +347,13 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface WaitsBlock : Block
+    public interface IWaitsBlock : IBlock
     {
         object WaitsBlock(Env env, int timeout, Spec spec);
     }
 
     [Imported]
-    public interface WaitsForBlock : Block
+    public interface IWaitsForBlock : IBlock
     {
         object WaitsBlock(Env env, int timeout, SpecFunction latchFunction, string message, Spec spec);
     }
@@ -255,7 +371,7 @@ namespace Jasmine
 
         public Spec currentSpec;
 
-        public Matcher matchersClass;
+        public Matchers matchersClass;
 
         public object version()
         {
@@ -278,13 +394,13 @@ namespace Jasmine
         }
         public void beforeEach(Action beforeEachFunction){}
         public void beforeAll(Action beforeAllFunction){}
-        public Runner currentRunner()
+        public IRunner currentRunner()
         {
             return null;
         }
         public void afterEach(Action afterEachFunction){}
         public void afterAll(Action afterAllFunction){}
-        public XSuite xdescribe(string desc, Action specDefinitions)
+        public IXSuite xdescribe(string desc, Action specDefinitions)
         {
             return null;
         }
@@ -320,7 +436,7 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface FakeTimer
+    public interface IFakeTimer
     {
         object FakeTimer();
 
@@ -331,13 +447,13 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface HtmlReporter
+    public interface IHtmlReporter
     {
         object HtmlReporter();
     }
 
     [Imported]
-    public interface HtmlSpecFilter
+    public interface IHtmlSpecFilter
     {
         object HtmlSpecFilter();
     }
@@ -405,7 +521,7 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface PrettyPrinter
+    public interface IPrettyPrinter
     {
         object PrettyPrinter();
 
@@ -419,28 +535,31 @@ namespace Jasmine
     }
 
     [Imported]
-    public interface StringPrettyPrinter : PrettyPrinter
+    public interface IStringPrettyPrinter : IPrettyPrinter
     {
     }
 
     [Imported]
     public class Queue
     {
-
         private Queue(object env){ }
 
         public Env env;
         public bool[] ensured;
-        public Block[] blocks;
+        public IBlock[] blocks;
         public bool running;
         public int index;
         public int offset;
         public bool abort;
 
-        public void addBefore(Block block, bool ensure = false) { }
-        public void add(object block, bool ensure = false) { }
-        public void insertNext(object block, bool ensure = false) { }
-        public void start(Action onComplete = null) { }
+        public void addBefore(IBlock block) { }
+        public void addBefore(IBlock block, bool ensure) { }
+        public void add(object block) { }
+        public void add(object block, bool ensure) { }
+        public void insertNext(object block) { }
+        public void insertNext(object block, bool ensure) { }
+        public void start() { }
+        public void start(Action onComplete) { }
         public bool isRunning()
         {
             return false;
@@ -452,23 +571,25 @@ namespace Jasmine
             return null;
         }
     }
-
+    
     public class Reporter
     {
-        public void reportRunnerStarting(Runner runner) { }
-        public void reportRunnerResults(Runner runner) { }
+        public void reportRunnerStarting(IRunner runner) { }
+        public void reportRunnerResults(IRunner runner) { }
         public void reportSuiteResults(Suite suite) { }
         public void reportSpecStarting(Spec spec) { }
         public void reportSpecResults(Spec spec) { }
         public void log(string str) { }
     }
 
+    [Imported]
     public class MultiReporter : Reporter
     {
         public void addReporter(Reporter reporter) { }
     }
 
-    public interface Runner
+    [Imported]
+    public interface IRunner
     {
         object Runner(Env env);
 
@@ -479,15 +600,16 @@ namespace Jasmine
         void afterAll(SpecFunction afterAllFunction);
         void finishCallback();
         void addSuite(Suite suite);
-        void add(Block block);
+        void add(IBlock block);
         Spec[] specs();
         Suite[] suites();
         Suite[] topLevelSuites();
         NestedResults results();
     }
+    
+    public delegate void SpecFunction(Spec spec = null); //TODO overload?
 
-    public delegate void SpecFunction(Spec spec = null);
-
+    [Imported]
     public class SuiteOrSpec
     {
         public int id;
@@ -496,6 +618,7 @@ namespace Jasmine
         public Queue queue;
     }
 
+    [Imported]
     public class Spec : SuiteOrSpec
     {
 
@@ -507,7 +630,7 @@ namespace Jasmine
         public Spy[] spies_;
 
         public NestedResults results_;
-        public Matcher matchersClass;
+        public Matchers matchersClass;
 
         public string getFullName()
         {
@@ -525,7 +648,7 @@ namespace Jasmine
         {
             return null;
         }
-        public void addToQueue(Block block) { }
+        public void addToQueue(IBlock block) { }
         public void addMatcherResult(Result result) { }
         public object expect(object actual)
         {
@@ -539,16 +662,22 @@ namespace Jasmine
         {
             return null;
         }
-        public void fail(object e = null) { }
-        public Matcher getMatchersClass_()
+        public void fail() { }
+        public void fail(object e) { }
+        public Matchers getMatchersClass_()
         {
             return null;
         }
         public void addMatchers(object matchersPrototype) { }
         public void finishCallback() { }
-        public void finish(Action onComplete = null) { }
+        public void finish() { }
+        public void finish(Action onComplete) { }
         public void after(SpecFunction doAfter) { }
-        public object execute(Action onComplete = null)
+        public object execute()
+        {
+            return null;
+        }
+        public object execute(Action onComplete)
         {
             return null;
         }
@@ -561,6 +690,7 @@ namespace Jasmine
         public void removeAllSpies() { }
     }
 
+    [Imported]
     public class XSpec
     {
         private XSpec() { }
@@ -569,6 +699,7 @@ namespace Jasmine
         public void runs() { }
     }
 
+    [Imported]
     public class Suite : SuiteOrSpec
     {
 
@@ -580,7 +711,8 @@ namespace Jasmine
         {
             return null;
         }
-        public void finish(Action onComplete = null) { }
+        public void finish() { }
+        public void finish(Action onComplete) { }
         public void beforeEach(SpecFunction beforeEachFunction) { }
         public void afterEach(SpecFunction afterEachFunction) { }
         public void beforeAll(SpecFunction beforeAllFunction) { }
@@ -602,42 +734,48 @@ namespace Jasmine
         {
             return null;
         }
-        public void execute(Action onComplete = null) { }
+        public void execute() { }
+        public void execute(Action onComplete) { }
     }
 
-    public interface XSuite
+    [Imported]
+    public interface IXSuite
     {
         void execute();
     }
 
-    public interface SpyAnd
+    [Imported]
+    public interface ISpyAnd
     {
+        string identity();
         Spy callThrough();
-        void returnValue(object val);
+        Spy returnValue(object val);
         Spy callFake(Function fn);
         void throwError(string msg);
         Spy stub();
     }
 
-    public interface Calls
+    [Imported]
+    public interface ICalls
     {
         bool any();
         int count();
         object[] argsFor(int index);
-        object[] allArgs();
-        object all();
-        object mostRecent();
-        object first();
+        object[][] allArgs();
+        SpyCall[] all();
+        SpyCall mostRecent();
+        SpyCall first();
         void reset();
     }
 
-    public interface IUtil
+    [Imported]
+    [PreserveMemberCase(false)]
+    public sealed class SpyCall
     {
-        object inherit(Function childClass, Function parentClass);
-        object formatException(object e);
-        string htmlEscape(string str);
-        object argsToArray(object args);
-        object extend(object destination, object source);
+        private SpyCall() { }
+
+        public object[] Args;
+        public object Object;
     }
     
     public class JsApiReporter : Reporter
@@ -648,7 +786,14 @@ namespace Jasmine
         public object result;
         public object messages;
 
-        private JsApiReporter() { }
+        public Action<IReporterSuiteInfo> jasmineStarted;
+        public Action jasmineDone;
+        public Action<IReporterResult> suiteStarted;
+        public Action<IReporterResult> suiteDone;
+        public Action<IReporterResult> specStarted;
+        public Action<IReporterResult> specDone;
+
+        public JsApiReporter() { }
 
         public Suite[] suites()
         {
@@ -679,82 +824,28 @@ namespace Jasmine
             return null;
         }
     }
-}
 
-public static class jasmine
-{
-    [InlineCode("jasmine.clock()")]
-    public static Jasmine.Clock clock()
+    [PreserveMemberCase]
+    public class IReporterSuiteInfo
     {
-        return null;
+        public int totalSpecsDefined;
     }
 
-    [InlineCode("jasmine.Spec()")]
-    public static Jasmine.Spec Spec()
+    [PreserveMemberCase]
+    public class IReporterResult
     {
-        return null;
-    }
-    
-    public static Jasmine.IUtil util;
-
-    [InlineCode("jasmine.any({any})")]
-    public static Jasmine.IAny any(object any)
-    {
-        return null;
+        public int id;
+        public string fullName;
+        public string description;
+        public string status;
+        public IReporterError[] failedExpectations;
     }
 
-    [InlineCode("jasmine.objectContaining({sample})")]
-    public static Jasmine.IObjectContaining objectContaining(object sample)
+    [PreserveMemberCase]
+    public class IReporterError
     {
-        return null;
+        public int id;
+        public string stack;
+        public string message;
     }
-
-    [InlineCode("jasmine.createSpy({name}, {originalFunction})")]
-    public static Jasmine.Spy createSpy(string name, Delegate originalFunction = null)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
-    public static dynamic createSpyObj(string baseName, string[] methodNames)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.createSpyObj({baseName}, {methodNames})")]
-    public static T createSpyObj<T>(string baseName, string[] methodNames)
-    {
-        return default(T);
-    }
-
-    [InlineCode("jasmine.pp({value})")]
-    public static string pp(object value)
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.getEnv()")]
-    public static Jasmine.Env getEnv()
-    {
-        return null;
-    }
-
-    [InlineCode("jasmine.addMatchers({matcher})")]
-    public static void addMatcher(object matcher) { } //TODO: create a Matcher interface that is a function that return an object that has a compar node, which returns a result object 
-
-
-    /*
-    TODO:    
-    
-    interface Jasmine
-    {
-        Spec: Spec;
-        clock: Clock;
-        util: IUtil;
-    }
-
-    export var HtmlReporter: HtmlReporter;
-    export var HtmlSpecFilter: HtmlSpecFilter;
-    export var DEFAULT_TIMEOUT_INTERVAL: number;
-    */
 }
