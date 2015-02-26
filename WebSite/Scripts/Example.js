@@ -20,22 +20,6 @@
 	$JasmineTests$MatcherResult.__typeName = 'JasmineTests$MatcherResult';
 	global.JasmineTests$MatcherResult = $JasmineTests$MatcherResult;
 	////////////////////////////////////////////////////////////////////////////////
-	// JasmineTests.ToBeDivisibleBy
-	var $JasmineTests$ToBeDivisibleBy = function(util, customEqualityTesters) {
-		$JasmineTests$ToBeDivisibleBy.util = util;
-		$JasmineTests$ToBeDivisibleBy.customEqualityTesters = customEqualityTesters;
-	};
-	$JasmineTests$ToBeDivisibleBy.__typeName = 'JasmineTests$ToBeDivisibleBy';
-	global.JasmineTests$ToBeDivisibleBy = $JasmineTests$ToBeDivisibleBy;
-	////////////////////////////////////////////////////////////////////////////////
-	// JasmineTests.ToBeGoofy
-	var $JasmineTests$ToBeGoofy = function(util, customEqualityTesters) {
-		$JasmineTests$ToBeGoofy.util = util;
-		$JasmineTests$ToBeGoofy.customEqualityTesters = customEqualityTesters;
-	};
-	$JasmineTests$ToBeGoofy.__typeName = 'JasmineTests$ToBeGoofy';
-	global.JasmineTests$ToBeGoofy = $JasmineTests$ToBeGoofy;
-	////////////////////////////////////////////////////////////////////////////////
 	// MatcherExtensions
 	var $MatcherExtensions = function() {
 	};
@@ -649,15 +633,22 @@
 				});
 			});
 			var customMatchers = {};
-			customMatchers['toBeGoofy'] = function(util, customEqualityTesters) {
-				return new $JasmineTests$ToBeGoofy(util, customEqualityTesters);
-			};
-			customMatchers['toBeDivisibleBy'] = function(util1, customEqualityTesters1) {
-				return new $JasmineTests$ToBeDivisibleBy(util1, customEqualityTesters1);
-			};
+			customMatchers['toBeGoofy'] = $JasmineTests.$_toBeGoofy;
+			customMatchers['toBeDivisibleBy'] = $JasmineTests.$_toBeDivisibleBy;
 			describe("Custom matcher: 'toBeGoofy'", function() {
 				beforeEach(function() {
-					jasmine.addMatchers(customMatchers);
+					//AddMatchers(customMatchers);
+					(function() {
+						var $n = 'toBeGoofy', $m = $JasmineTests.$_toBeGoofy, $o = {};
+						$o[$n] = function($u, $c) {
+							return {
+								compare: function($a, $e) {
+									return $m($u, $c, $a, $e);
+								}
+							};
+						};
+						jasmine.addMatchers($o);
+					})();
 				});
 				it('is available on an expectation', function() {
 					expect({ hyuk: 'gawrsh' }).toBeGoofy();
@@ -671,7 +662,19 @@
 			});
 			describe("Custom matcher: 'toBeDivisibleBy'", function() {
 				beforeEach(function() {
-					jasmine.addMatchers(customMatchers);
+					(function() {
+						var $m = customMatchers;
+						jasmine.addMatchers(Object.keys($m).reduce(function($acc, $key) {
+							$acc[$key] = function($u, $c) {
+								return {
+									compare: function($a, $e) {
+										return $m[$key]($u, $c, $a, $e);
+									}
+								};
+							};
+							return $acc;
+						}, {}));
+					})();
 				});
 				it('is available on an expectation', function() {
 					expect(7).toBeDivisibleBy(7);
@@ -744,45 +747,6 @@
 		}
 	}, Object);
 	ss.initClass($JasmineTests$MatcherResult, $asm, {});
-	ss.initClass($JasmineTests$ToBeDivisibleBy, $asm, {
-		compare: function(actual, expected) {
-			var ResultPass = false;
-			var ResultMessage = '';
-			var MatcherResult = new $JasmineTests$MatcherResult(ResultPass, ResultMessage);
-			var actualConvert = ss.safeCast(actual, ss.Int32);
-			if (ss.isValue(actualConvert)) {
-				MatcherResult.pass = ss.unbox(actualConvert) % expected === 0;
-			}
-			else {
-				MatcherResult.message = ss.formatString('Expected {0} to be divisble by {1}, but It was not a number', actual, expected);
-				return MatcherResult;
-			}
-			if (MatcherResult.pass) {
-				MatcherResult.message = ss.formatString('Expected {0} not to be divisble by {1}', actual, expected);
-			}
-			else {
-				MatcherResult.message = ss.formatString('Expected {0} to be divisble by {1}', actual, expected);
-			}
-			return MatcherResult;
-		}
-	});
-	ss.initClass($JasmineTests$ToBeGoofy, $asm, {
-		compare: function(actual, expected) {
-			if (ss.referenceEquals(expected, ss.cast(undefined, String))) {
-				expected = '';
-			}
-			var ResultPass = false;
-			var ResultMessage = '';
-			ResultPass = $JasmineTests$ToBeGoofy.util.equals(actual['hyuk'], 'gawrsh' + expected, $JasmineTests$ToBeGoofy.customEqualityTesters);
-			if (ResultPass) {
-				ResultMessage = ss.formatString('Expected {0} not to be quite so goofy', actual);
-			}
-			else {
-				ResultMessage = ss.formatString('Expected {0} to be goofy, but It was not very goofy', actual);
-			}
-			return new $JasmineTests$MatcherResult(ResultPass, ResultMessage);
-		}
-	});
 	ss.initClass($MatcherExtensions, $asm, {});
 	ss.initClass($NewReporter, $asm, {
 		jasmineStarted: function(suiteInfo) {
@@ -812,8 +776,27 @@
 			console.log('Finished suite');
 		}
 	});
-	$JasmineTests$ToBeGoofy.util = null;
-	$JasmineTests$ToBeGoofy.customEqualityTesters = null;
-	$JasmineTests$ToBeDivisibleBy.util = null;
-	$JasmineTests$ToBeDivisibleBy.customEqualityTesters = null;
+	$JasmineTests.$_toBeGoofy = function(util, customEqualityTesters, actual, expected) {
+		if (ss.isNullOrUndefined(expected)) {
+			expected = '';
+		}
+		var resultPass = util.equals(actual['hyuk'], 'gawrsh' + expected, customEqualityTesters);
+		var resultMessage = ss.formatString((resultPass ? 'Expected {0} not to be quite so goofy' : 'Expected {0} to be goofy, but It was not very goofy'), actual);
+		return new $JasmineTests$MatcherResult(resultPass, resultMessage);
+	};
+	$JasmineTests.$_toBeDivisibleBy = function(util, customEqualityTesters, actual, expected) {
+		var ResultPass = false;
+		var ResultMessage = '';
+		var MatcherResult = new $JasmineTests$MatcherResult(ResultPass, ResultMessage);
+		var actualConvert = ss.safeCast(actual, ss.Int32);
+		if (ss.isValue(actualConvert)) {
+			MatcherResult.pass = ss.unbox(actualConvert) % ss.unbox(ss.cast(expected, ss.Int32)) === 0;
+		}
+		else {
+			MatcherResult.message = ss.formatString('Expected {0} to be divisble by {1}, but It was not a number', actual, expected);
+			return MatcherResult;
+		}
+		MatcherResult.message = ss.formatString((MatcherResult.pass ? 'Expected {0} not to be divisble by {1}' : 'Expected {0} to be divisble by {1}'), actual, expected);
+		return MatcherResult;
+	};
 })();

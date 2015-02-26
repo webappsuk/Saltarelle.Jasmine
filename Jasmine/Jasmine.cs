@@ -53,18 +53,12 @@ namespace Jasmine
 
         // typeof matcher?
     }
-
-    [Imported]
-    public interface ICustomMatcher
-    {
-        //can't make a compare method here as an classes that implement the generic will complain that they don't implement the non-generic compare
-    }
-
-    [Imported]
-    public interface ICustomMatcher<in T> : ICustomMatcher
-    {
-       IMatcherResult Compare(object actual, T expect);
-    }
+    
+    public delegate IMatcherResult CustomMatcherComparer(
+        CustomMatcherUtil util,
+        object customEqualityTesters,
+        object actual, 
+        object expected);
 
     [Imported]
     public interface IMatcherResult
@@ -83,15 +77,24 @@ namespace Jasmine
         //}
     }
     
-    
-    public interface ICustomMatcherUtil
+    [Imported]
+    public sealed class CustomMatcherUtil
     {
+        /// <summary>
+        /// Prevent instantiation of utilities class which is provided by Jasmine directly.
+        /// </summary>
+        private CustomMatcherUtil()
+        {
+        }
+
         [PreserveName]
-        string BuildFailureMessage();
+        public string BuildFailureMessage() { return null; }
+
         [PreserveName]
-        bool Contains(object haystack, object needle, object customTesters);
+        public bool Contains(object haystack, object needle, object customTesters) { return false; }
+
         [PreserveName]
-        bool Equals(object a, object b, object customTesters);
+        public bool Equals(object a, object b, object customTesters) { return false; }
     }
 
     [Imported]
@@ -275,8 +278,11 @@ namespace Jasmine
             return null;
         }
 
-        [InlineCode("jasmine.addMatchers({matcher})")]
-        public static void AddMatchers(JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>> matcher) { }
+        [InlineCode("(function(){{var $m={matchers}; jasmine.addMatchers(Object.keys($m).reduce(function($acc,$key){{ $acc[$key]=function($u, $c) {{ return {{ compare: function($a, $e) {{ return $m[$key]($u, $c, $a, $e); }} }}; }}; return $acc; }}, {{}}));}})()")]
+        public static void AddMatchers(JsDictionary<string, CustomMatcherComparer> matchers) { }
+
+        [InlineCode("(function(){{var $n={name}, $m={matcher}, $o={}; $o[$n]=function($u, $c) {{ return {{ compare: function($a, $e) {{ return $m($u, $c, $a, $e); }} }}; }}; jasmine.addMatchers($o);}})()")]
+        public static void AddMatcher(string name, CustomMatcherComparer matcher) { }
 
         [InlineCode("jasmine.addCustomEqualityTester({customEquality})")]
         public static void AddCustomEqualityTester(object customEquality) { }
@@ -320,8 +326,10 @@ namespace Jasmine
         }
 
     [Imported]
-    public class Clock
+    public sealed class Clock
     {
+        private Clock() {}
+
         public void Install() { }
         
         public void Uninstall() { }

@@ -1124,12 +1124,6 @@ public class JasmineTests : JasmineSuite
          */
 
         /**
-         * This object has a custom matcher named "toBeGoofy".
-         */
-        JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>> customMatchers =
-            new JsDictionary<string, Func<ICustomMatcherUtil, object, ICustomMatcher>>();
-
-        /**
         * ## Matcher Factories
         *
         * Custom matcher factories are passed two parameters: `util`, which has a set of utility functions for matchers to use (see: [`matchersUtil.js`][mu.js] for the current list) and `customEqualityTesters` which needs to be passed in if `util.equals` is ever called. These parameters are available for use when then matcher is called.
@@ -1139,8 +1133,9 @@ public class JasmineTests : JasmineSuite
         /**
         * The factory method should return an object with a `compare` function that will be called to check the expectation.
         */
-        customMatchers["toBeGoofy"] = (util, customEqualityTesters) => new ToBeGoofy(util, customEqualityTesters);
-        customMatchers["toBeDivisibleBy"] = (util, customEqualityTesters) => new ToBeDivisibleBy(util, customEqualityTesters);
+        var customMatchers = new JsDictionary<string, CustomMatcherComparer>();
+        customMatchers["toBeGoofy"] = _toBeGoofy;
+        customMatchers["toBeDivisibleBy"] = _toBeDivisibleBy;
 
 
         /**
@@ -1159,7 +1154,8 @@ public class JasmineTests : JasmineSuite
              */
             BeforeEach(() =>
             {
-                AddMatchers(customMatchers);
+                //AddMatchers(customMatchers);
+                AddMatcher("toBeGoofy", _toBeGoofy);
             });
 
             /**
@@ -1342,113 +1338,61 @@ public class JasmineTests : JasmineSuite
 
     }
 
-    public class ToBeGoofy : ICustomMatcher<string>
-    {
-        public static ICustomMatcherUtil Util;
-        public static object CustomEqualityTesters;
-
-        public ToBeGoofy(ICustomMatcherUtil util, object customEqualityTesters)
+    private readonly static CustomMatcherComparer _toBeGoofy =
+        (util, customEqualityTesters, actual, expected) =>
         {
-            ToBeGoofy.Util = util;
-            ToBeGoofy.CustomEqualityTesters = customEqualityTesters;
-        }
-
-        /**
-        * ## A Function to `compare`
-        *
-        * The compare function receives the value passed to `Expect()` as the first argument - the actual - and the value (if any) passed to the matcher itself as second argument.
-        */
-        public IMatcherResult Compare(object actual, string expected)
-        {
-
             /**
-                * `toBeGoofy` takes an optional `expected` argument, so define It here if not passed in.
-                */
-            if (expected == (string)Script.Undefined)
-            {
+             * `toBeGoofy` takes an optional `expected` argument, so define It here if not passed in.
+             */
+            if (expected == null)
                 expected = "";
-            }
-            
-            /**
-            * ### Result
-            *
-            * The `compare` function must return a result object with a `pass` property that is a boolean result of the matcher. The `pass` property tells the expectation whether the matcher was successful (`true`) or unsuccessful (`false`). If the expectation is called/chained with `.not`, the expectation will negate this to determine whether the expectation is met.
-            */
-            bool ResultPass = false;
-            string ResultMessage = "";
-            /**
-            * `toBeGoofy` tests for equality of the actual's `hyuk` property to see if It matches the expectation.
-            */
-            ResultPass = ToBeGoofy.Util.Equals(((JsDictionary)actual)["hyuk"], "gawrsh" + expected, ToBeGoofy.CustomEqualityTesters);
 
             /**
-            * ### Failure Messages
-            *
-            * If left `undefined`, the expectation will attempt to craft a failure message for the matcher. However, if the return value has a `message` property It will be used for a  failed expectation.
-            */
-            if (ResultPass)
-            {
-                /**
-                * The matcher succeeded, so the custom failure message should be present in the case of a negative expectation - when the expectation is used with `.not`.
-                */
-                ResultMessage = String.Format("Expected {0} not to be quite so goofy", actual);
-            }
-            else
-            {
-                /**
-                * The matcher failed, so the custom failure message should be present in the case of a positive expectation
-                */
-                ResultMessage = String.Format("Expected {0} to be goofy, but It was not very goofy", actual);
-            }
+             * ### Result
+             *
+             * The `compare` function must return a result object with a `pass` property that is a boolean result of the matcher. The `pass` property tells the expectation whether the matcher was successful (`true`) or unsuccessful (`false`). If the expectation is called/chained with `.not`, the expectation will negate this to determine whether the expectation is met.
+             */
+            /**
+             * `toBeGoofy` tests for equality of the actual's `hyuk` property to see if It matches the expectation.
+             */
+            bool resultPass = util.Equals(((JsDictionary)actual)["hyuk"], "gawrsh" + expected, customEqualityTesters);
 
             /**
-            * Return the result of the comparison.
-            */
-            return new MatcherResult(ResultPass, ResultMessage);
-        }
-    }
+             * ### Failure Messages
+             *
+             * If left `undefined`, the expectation will attempt to craft a failure message for the matcher. However, if the return value has a `message` property It will be used for a  failed expectation.
+             */
+            string resultMessage = string.Format(resultPass ? "Expected {0} not to be quite so goofy" : "Expected {0} to be goofy, but It was not very goofy", actual);
 
-    public class ToBeDivisibleBy : ICustomMatcher<int>
+            /**
+             * Return the result of the comparison.
+             */
+            return new MatcherResult(resultPass, resultMessage);
+        };
+
+
+    private static readonly CustomMatcherComparer _toBeDivisibleBy =
+        (util, customEqualityTesters, actual, expected) =>
     {
-        public static ICustomMatcherUtil Util;
-        public static object CustomEqualityTesters;
+        bool ResultPass = false;
+        string ResultMessage = "";
+        var MatcherResult = new MatcherResult(ResultPass, ResultMessage);
 
-        public ToBeDivisibleBy(ICustomMatcherUtil util, object customEqualityTesters)
+        int? actualConvert = actual as int?;
+        if (actualConvert != null)
+            MatcherResult.Pass = actualConvert.Value%(int) expected == 0;
+        else
         {
-            ToBeDivisibleBy.Util = util;
-            ToBeDivisibleBy.CustomEqualityTesters = customEqualityTesters;
-        }
-
-        public IMatcherResult Compare(object actual, int expected)
-        {
-            bool ResultPass = false;
-            string ResultMessage = "";
-            var MatcherResult = new MatcherResult(ResultPass, ResultMessage);
-
-            int? actualConvert = actual as int?;
-            if (actualConvert != null)
-            {
-                MatcherResult.Pass = actualConvert.Value % expected == 0;
-            }
-            else
-            {
-                MatcherResult.Message = String.Format("Expected {0} to be divisble by {1}, but It was not a number", actual, expected);
-                return MatcherResult;
-            }
-
-            if (MatcherResult.Pass)
-            {
-                MatcherResult.Message = String.Format("Expected {0} not to be divisble by {1}", actual, expected);
-            }
-            else
-            {
-                MatcherResult.Message = String.Format("Expected {0} to be divisble by {1}", actual, expected);
-            }
-
+            MatcherResult.Message = string.Format("Expected {0} to be divisble by {1}, but It was not a number", actual,
+                expected);
             return MatcherResult;
         }
-    }
-    
+
+        MatcherResult.Message = string.Format(MatcherResult.Pass ? "Expected {0} not to be divisble by {1}" : "Expected {0} to be divisble by {1}", actual, expected);
+
+        return MatcherResult;
+    };
+
     public class MatcherResult : IMatcherResult
     {
         public bool Pass;
