@@ -22,16 +22,16 @@
 	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests.ToBeDivisibleBy
 	var $JasmineTests$ToBeDivisibleBy = function(util, customEqualityTesters) {
-		$JasmineTests$ToBeDivisibleBy.Util = util;
-		$JasmineTests$ToBeDivisibleBy.CustomEqualityTesters = customEqualityTesters;
+		$JasmineTests$ToBeDivisibleBy.util = util;
+		$JasmineTests$ToBeDivisibleBy.customEqualityTesters = customEqualityTesters;
 	};
 	$JasmineTests$ToBeDivisibleBy.__typeName = 'JasmineTests$ToBeDivisibleBy';
 	global.JasmineTests$ToBeDivisibleBy = $JasmineTests$ToBeDivisibleBy;
 	////////////////////////////////////////////////////////////////////////////////
 	// JasmineTests.ToBeGoofy
 	var $JasmineTests$ToBeGoofy = function(util, customEqualityTesters) {
-		$JasmineTests$ToBeGoofy.Util = util;
-		$JasmineTests$ToBeGoofy.CustomEqualityTesters = customEqualityTesters;
+		$JasmineTests$ToBeGoofy.util = util;
+		$JasmineTests$ToBeGoofy.customEqualityTesters = customEqualityTesters;
 	};
 	$JasmineTests$ToBeGoofy.__typeName = 'JasmineTests$ToBeGoofy';
 	global.JasmineTests$ToBeGoofy = $JasmineTests$ToBeGoofy;
@@ -42,11 +42,11 @@
 	$MatcherExtensions.__typeName = 'MatcherExtensions';
 	global.MatcherExtensions = $MatcherExtensions;
 	////////////////////////////////////////////////////////////////////////////////
-	// newReporter
-	var $newReporter = function() {
+	// NewReporter
+	var $NewReporter = function() {
 	};
-	$newReporter.__typeName = 'newReporter';
-	global.newReporter = $newReporter;
+	$NewReporter.__typeName = 'NewReporter';
+	global.NewReporter = $NewReporter;
 	ss.initClass($JasmineTests, $asm, {
 		SpecRunner1: function() {
 			//
@@ -54,13 +54,13 @@
 			//
 			//        {
 			//
-			//        it("assigments should work",()=>
+			//        It("assigments should work",()=>
 			//
 			//        {
 			//
 			//        var a=5;
 			//
-			//        expect(a).not.toBe(6);
+			//        Expect(a).not.toBe(6);
 			//
 			//        });
 			//
@@ -111,9 +111,9 @@
 				});
 				it("The 'toMatch' matcher is for regular expressions", function() {
 					var message = 'foo bar baz';
-					//expect(message).toMatch(/bar/);       // regex literal expressions do not exist in C#
+					//Expect(message).toMatch(/bar/);       // regex literal expressions do not exist in C#
 					expect(message).toMatch('bar');
-					//expect(message).not.toMatch(/quux/);  // regex literal expressions do not exist in C#
+					//Expect(message).not.toMatch(/quux/);  // regex literal expressions do not exist in C#
 				});
 				it("The 'toBeDefined' matcher compares against `undefined`", function() {
 					var a3 = {};
@@ -183,7 +183,7 @@
 				});
 			});
 			describe('A spec', function() {
-				it('is just a function, so it can contain any code', function() {
+				it('is just a function, so It can contain any code', function() {
 					var foo5 = 0;
 					foo5 += 1;
 					expect(foo5).toEqual(1);
@@ -204,7 +204,7 @@
 				afterEach(function() {
 					foo7 = 0;
 				});
-				it('is just a function, so it can contain any code', function() {
+				it('is just a function, so It can contain any code', function() {
 					expect(foo7).toEqual(1);
 				});
 				it('can have more than one expectation', function() {
@@ -221,7 +221,7 @@
 				afterEach(function() {
 					foo8 = 0;
 				});
-				it('is just a function, so it can contain any code', function() {
+				it('is just a function, so It can contain any code', function() {
 					expect(foo8).toEqual(1);
 				});
 				it('can have more than one expectation', function() {
@@ -244,7 +244,7 @@
 					foo9 = 0;
 					foo9 += 1;
 				});
-				xit('is just a function, so it can contain any code', function() {
+				xit('is just a function, so It can contain any code', function() {
 					expect(foo9).toEqual(1);
 				});
 			});
@@ -255,16 +255,16 @@
 			//     */
 			//    xit("can be declared 'xit'", () =>
 			//    {
-			//        expect(true).toBe(false);
+			//        Expect(true).toBe(false);
 			//    });
 			//    /** Any spec declared without a function body will also be marked pending in results.
 			//     */
-			//    it("can be declared with 'it' but without a function");
+			//    It("can be declared with 'It' but without a function");
 			//    /** And if you call the function `pending` anywhere in the spec body, no matter the expectations, the spec will be marked pending.
 			//     */
-			//    it("can be declared by calling 'pending' in the spec body", () =>
+			//    It("can be declared by calling 'pending' in the spec body", () =>
 			//    {
-			//        expect(true).toBe(false);
+			//        Expect(true).toBe(false);
 			//        pending();
 			//    });
 			//});
@@ -437,12 +437,12 @@
 					};
 					fooSetBar = spyOn(foo16, 'setBar');
 				});
-				it('tracks if it was called at all', function() {
+				it('tracks if It was called at all', function() {
 					expect(fooSetBar.calls.any()).toEqual(false);
 					foo16['setBar'](0);
 					expect(fooSetBar.calls.any()).toEqual(true);
 				});
-				it('tracks the number of times it was called', function() {
+				it('tracks the number of times It was called', function() {
 					expect(fooSetBar.calls.count()).toEqual(0);
 					foo16['setBar'](0);
 					foo16['setBar'](0);
@@ -564,7 +564,7 @@
 					foo18['b'] = 2;
 					foo18['bar'] = 'baz';
 				});
-				it('matches objects with the expect key/value pairs', function() {
+				it('matches objects with the Expect key/value pairs', function() {
 					expect(foo18).toEqual(jasmine.objectContaining({ bar: 'baz' }));
 					expect(foo18).not.toEqual(jasmine.objectContaining({ c: 37 }));
 				});
@@ -697,7 +697,7 @@
 					expect('abc').not.toEqual('abc');
 				});
 			});
-			var myReporter = new $newReporter();
+			var myReporter = new $NewReporter();
 			jasmine.getEnv().addReporter(myReporter);
 			describe('Top Level suite', function() {
 				it('spec', function() {
@@ -713,20 +713,20 @@
 			//    /** Any spec declared with `fit` is focused.
 			//     */
 			//    fit("is focused and will run", () => {
-			//        expect(true).toBeTruthy();
+			//        Expect(true).toBeTruthy();
 			//    });
-			//    it("is not focused and will not run", () =>{
-			//        expect(true).toBeFalsy();
+			//    It("is not focused and will not run", () =>{
+			//        Expect(true).toBeFalsy();
 			//    });
 			//    /** You can focus on a `describe` with `fdescribe`
 			//     *
 			//     */
 			//    fdescribe("focused describe", () =>{
-			//        it("will run", () =>{
-			//            expect(true).toBeTruthy();
+			//        It("will run", () =>{
+			//            Expect(true).toBeTruthy();
 			//        });
-			//        it("will also run", () =>{
-			//            expect(true).toBeTruthy();
+			//        It("will also run", () =>{
+			//            Expect(true).toBeTruthy();
 			//        });
 			//    });
 			//    /** If you nest focused and unfocused specs inside `fdescribes`, only focused specs run.
@@ -734,10 +734,10 @@
 			//     */
 			//    fdescribe("another focused describe", () =>{
 			//        fit("is focused and will run", () => {
-			//            expect(true).toBeTruthy();
+			//            Expect(true).toBeTruthy();
 			//        });
-			//        it("is not focused and will not run", () =>{
-			//            expect(true).toBeFalsy();
+			//        It("is not focused and will not run", () =>{
+			//            Expect(true).toBeFalsy();
 			//        });
 			//    });
 			//});
@@ -746,24 +746,24 @@
 	ss.initClass($JasmineTests$MatcherResult, $asm, {});
 	ss.initClass($JasmineTests$ToBeDivisibleBy, $asm, {
 		compare: function(actual, expected) {
-			var resultPass = false;
-			var resultMessage = '';
-			var matcherResult = new $JasmineTests$MatcherResult(resultPass, resultMessage);
+			var ResultPass = false;
+			var ResultMessage = '';
+			var MatcherResult = new $JasmineTests$MatcherResult(ResultPass, ResultMessage);
 			var actualConvert = ss.safeCast(actual, ss.Int32);
 			if (ss.isValue(actualConvert)) {
-				matcherResult.pass = ss.unbox(actualConvert) % expected === 0;
+				MatcherResult.pass = ss.unbox(actualConvert) % expected === 0;
 			}
 			else {
-				matcherResult.message = ss.formatString('Expected {0} to be divisble by {1}, but it was not a number', actual, expected);
-				return matcherResult;
+				MatcherResult.message = ss.formatString('Expected {0} to be divisble by {1}, but It was not a number', actual, expected);
+				return MatcherResult;
 			}
-			if (matcherResult.pass) {
-				matcherResult.message = ss.formatString('Expected {0} not to be divisble by {1}', actual, expected);
+			if (MatcherResult.pass) {
+				MatcherResult.message = ss.formatString('Expected {0} not to be divisble by {1}', actual, expected);
 			}
 			else {
-				matcherResult.message = ss.formatString('Expected {0} to be divisble by {1}', actual, expected);
+				MatcherResult.message = ss.formatString('Expected {0} to be divisble by {1}', actual, expected);
 			}
-			return matcherResult;
+			return MatcherResult;
 		}
 	});
 	ss.initClass($JasmineTests$ToBeGoofy, $asm, {
@@ -771,20 +771,20 @@
 			if (ss.referenceEquals(expected, ss.cast(undefined, String))) {
 				expected = '';
 			}
-			var resultPass = false;
-			var resultMessage = '';
-			resultPass = $JasmineTests$ToBeGoofy.Util.equals(actual['hyuk'], 'gawrsh' + expected, $JasmineTests$ToBeGoofy.CustomEqualityTesters);
-			if (resultPass) {
-				resultMessage = ss.formatString('Expected {0} not to be quite so goofy', actual);
+			var ResultPass = false;
+			var ResultMessage = '';
+			ResultPass = $JasmineTests$ToBeGoofy.util.equals(actual['hyuk'], 'gawrsh' + expected, $JasmineTests$ToBeGoofy.customEqualityTesters);
+			if (ResultPass) {
+				ResultMessage = ss.formatString('Expected {0} not to be quite so goofy', actual);
 			}
 			else {
-				resultMessage = ss.formatString('Expected {0} to be goofy, but it was not very goofy', actual);
+				ResultMessage = ss.formatString('Expected {0} to be goofy, but It was not very goofy', actual);
 			}
-			return new $JasmineTests$MatcherResult(resultPass, resultMessage);
+			return new $JasmineTests$MatcherResult(ResultPass, ResultMessage);
 		}
 	});
 	ss.initClass($MatcherExtensions, $asm, {});
-	ss.initClass($newReporter, $asm, {
+	ss.initClass($NewReporter, $asm, {
 		jasmineStarted: function(suiteInfo) {
 			console.log('Running suite with ' + suiteInfo.totalSpecsDefined);
 		},
@@ -812,8 +812,8 @@
 			console.log('Finished suite');
 		}
 	});
-	$JasmineTests$ToBeGoofy.Util = null;
-	$JasmineTests$ToBeGoofy.CustomEqualityTesters = null;
-	$JasmineTests$ToBeDivisibleBy.Util = null;
-	$JasmineTests$ToBeDivisibleBy.CustomEqualityTesters = null;
+	$JasmineTests$ToBeGoofy.util = null;
+	$JasmineTests$ToBeGoofy.customEqualityTesters = null;
+	$JasmineTests$ToBeDivisibleBy.util = null;
+	$JasmineTests$ToBeDivisibleBy.customEqualityTesters = null;
 })();
